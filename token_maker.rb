@@ -14,8 +14,8 @@ assets = ['number0.png', 'number1.png', 'number2.png', 'number3.png', 'number4.p
           'bloodied.png', 'deactivated.png']
 
 # Create the directory
-dir_name = "#{File.basename(base_image_name, ".png")}_tokens"
-create_token_directory(dir_name)
+dir_name = "#{base_image_name}"
+create_token_directory(File.basename(base_image_name, ".png"))
 
 create_composites(base_image_name, asset_folder_name, assets, dir_name)
 
