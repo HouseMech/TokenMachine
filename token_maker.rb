@@ -1,5 +1,4 @@
 require_relative 'token_functions'
-require 'fileutils'
 
 # Check if the correct number of arguments is passed
 unless ARGV.length == 1
@@ -15,7 +14,6 @@ assets = ['number0.png', 'number1.png', 'number2.png', 'number3.png', 'number4.p
 
 # Create the directory
 dir_name = "#{base_image_name}"
-create_token_directory(File.basename(base_image_name, ".png"))
 
 create_composites(base_image_name, asset_folder_name, assets, dir_name)
 
