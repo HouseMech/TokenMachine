@@ -17,6 +17,17 @@ RSpec.configure do |config|
   # rspec-expectations config goes here. You can use an alternate
   # assertion/expectation library such as wrong or the stdlib/minitest
   # assertions if you prefer.
+  original_stderr = $stderr
+  original_stdout = $stdout
+  config.before(:all) do
+    # Redirect stderr and stdout
+    $stderr = File.new(File.join(__dir__, 'dev', 'null.txt'), 'w')
+    $stdout = File.new(File.join(__dir__, 'dev', 'null.txt'), 'w')
+  end
+  config.after(:all) do
+    $stderr = original_stderr
+    $stdout = original_stdout
+  end
   config.expect_with :rspec do |expectations|
     # This option will default to `true` in RSpec 4. It makes the `description`
     # and `failure_message` of custom matchers include text for helper methods
@@ -95,4 +106,12 @@ RSpec.configure do |config|
   # as the one that triggered the failure.
   Kernel.srand config.seed
 =end
+  config.include Module.new {
+    def base_path
+      File.expand_path(File.join(__dir__, '..'))
+    end
+    def assets_path
+      File.expand_path(File.join(base_path, 'lib', 'assets'))
+    end
+  }
 end
