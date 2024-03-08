@@ -1,9 +1,6 @@
 require 'rmagick'
 require 'fileutils'
 
-class BlankInputError < StandardError;
-end
-
 public
 def create_token_set(image_path, asset_folder, dir_name)
   create_composites(image_path, asset_folder, "/"+dir_name)

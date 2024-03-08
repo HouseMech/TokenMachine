@@ -5,6 +5,9 @@ require_relative '../lib/token_maker'
 #   exit
 # end
 
+class BlankInputError < StandardError;
+end
+
 if ARGV.length >= 1 #quickmode
   maker = TokenMaker.new(ARGV[0])
   maker.createToken()
