@@ -4,4 +4,6 @@ gem 'rspec'
 
 gem 'rmagick'
 
+gem 'rubocop', require: false
+
 gem 'tk'

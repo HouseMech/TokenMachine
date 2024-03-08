@@ -2,22 +2,21 @@ require_relative 'token_functions'
 
 class TokenMaker
   attr_reader :image, :assetfolder
-  
-  public
-  def initialize(image, assetfolder='assets')
+
+  def initialize(image, assetfolder = 'assets')
     @image = image
     @assetfolder = assetfolder
   end
 
-  def showImage()
-    return image
+  def show_image
+    image
   end
 
-  def showAssetFolder()
-    return assetfolder
+  def show_asset_folder
+    assetfolder
   end
 
-  def createToken(dirname='tokens')
+  def create_token(dirname = 'tokens')
     create_token_set(image, assetfolder, dirname)
   end
 end

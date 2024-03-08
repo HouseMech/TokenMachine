@@ -5,26 +5,25 @@ require_relative '../lib/token_maker'
 #   exit
 # end
 
-class BlankInputError < StandardError;
+class BlankInputError < StandardError
 end
 
-if ARGV.length >= 1 #quickmode
+if ARGV.length >= 1 # quickmode
   maker = TokenMaker.new(ARGV[0])
-  maker.createToken()
-else #slowmode
-  puts "Welcome to the TokenMaker!"
-  puts "This program takes an image of a token (eventually it will be able to make tokens) and creates numbered and alternative copies of the token."
-  puts "These tokens can then be used in Tabletop roleplaying games!"
-  puts "Please enter the path to your token image: "
+  maker.createToken
+else # slowmode
+  puts 'Welcome to the TokenMaker!'
+  puts 'This program takes an image of a token and creates numbered and alternative copies of the token.'
+  puts 'These tokens can then be used in Tabletop roleplaying games!'
+  puts 'Please enter the path to your token image: '
   begin
     path = gets
-    raise BlankInputError, "The image path cannot be blank." if path.nil? || path.to_s.strip.empty?
+    raise BlankInputError, 'The image path cannot be blank.' if path.nil? || path.to_s.strip.empty?
   rescue BlankInputError => e
     puts e.message
     retry
   else
     maker = TokenMaker.new(path)
-    maker.createToken()
+    maker.createToken
   end
 end
-
