@@ -42,9 +42,6 @@ def create_token_directory(dir_name)
 end
 
 def assets_path
-  # __dir__ returns the directory of the current file.
-  # Using File.join ensures compatibility across OSes by using the correct directory separators.
-  # File.expand_path is used to navigate up to the project's root directory then down to 'lib/assets'.
   File.expand_path(File.join(root_path, 'lib', 'assets'))
 end
 
