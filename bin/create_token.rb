@@ -18,8 +18,7 @@ else #slowmode
   puts "Please enter the path to your token image: "
   begin
     path = gets
-    path = path.strip
-    raise BlankInputError, "The image path cannot be blank." if path.empty?
+    raise BlankInputError, "The image path cannot be blank." if path.nil? || path.to_s.strip.empty?
   rescue BlankInputError => e
     puts e.message
     retry
