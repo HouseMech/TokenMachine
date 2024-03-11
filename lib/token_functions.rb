@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rmagick'
 require 'fileutils'
 
@@ -9,32 +11,39 @@ end
 
 private
 
-def create_composites(image_path, asset_folder_name, dir_name)
+def create_composites(image_path, asset_folder, dir_name)
   base_image = check_image_exists(image_path)
-  if base_image
-    create_token_directory(root_path + dir_name)
+  return unless base_image
 
-    asset_names.each_with_index do |asset, index|
-      asset_image = Magick::Image.read(asset).first
+  create_token_directory(root_path + dir_name)
 
-      # Composite the asset image onto the base image
-      composited_image = base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
-
-      # Save the composited image
-      if asset.include? 'number'
-        output_filename = File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{index}.png")
-      else
-        output_filename = File.join(root_path + dir_name,
-                                    "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
-      end
-      composited_image.write(output_filename)
-      puts "Saved: #{output_filename}"
-    end
-
-    puts 'Finished creating token images.'
-  else
-    puts 'Failed to create images'
+  asset_names(asset_folder).each_with_index do |asset, index|
+    asset_image = Magick::Image.read(asset).first
+    # Composite the asset image onto the base image
+    composited_image = base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
+    # Save the composited image
+    output_filename = create_output_filename(asset, index, image_path, dir_name)
+    save_composite_image(composited_image, output_filename)
   end
+end
+
+def save_composite_image(composited_image, output_filename)
+  composited_image.write(output_filename)
+  puts "Saved: #{output_filename}"
+end
+
+def create_composite_image(base_image, asset_image)
+  base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
+end
+
+def create_output_filename(asset, index, image_path, dir_name)
+  if asset.include? 'number'
+    output_filename = File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{index}.png")
+  else
+    output_filename = File.join(root_path + dir_name,
+                                "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
+  end
+  output_filename
 end
 
 def create_token_directory(dir_name)
@@ -49,8 +58,8 @@ def root_path
   File.expand_path(File.join(__dir__, '..'))
 end
 
-def asset_names
-  Dir["#{assets_path}/*.png"]
+def asset_names(path_to_asset_folder)
+  Dir["#{path_to_asset_folder == 'assets' ? assets_path : path_to_asset_folder}/*.png"]
 end
 
 def check_image_exists(image_path)

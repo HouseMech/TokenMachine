@@ -1,5 +1,8 @@
+# frozen_string_literal: true
+
 require_relative 'token_functions'
 
+# Creates tokens using the token_functions.rb file
 class TokenMaker
   attr_reader :image, :assetfolder
 
