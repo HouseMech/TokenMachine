@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'token_maker'
 
 RSpec.describe 'TokenFunctions' do
