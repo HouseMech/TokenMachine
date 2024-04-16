@@ -17,12 +17,12 @@ def create_composites(image_path, asset_folder, dir_name)
 
   create_token_directory(root_path + dir_name)
 
-  asset_names(asset_folder).each_with_index do |asset, index|
+  asset_names(asset_folder).each do |asset|
     asset_image = Magick::Image.read(asset).first
     # Composite the asset image onto the base image
-    composited_image = base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
+    composited_image = create_composite_image(base_image, asset_image)
     # Save the composited image
-    output_filename = create_output_filename(asset, index, image_path, dir_name)
+    output_filename = create_output_filename(asset, image_path, dir_name)
     save_composite_image(composited_image, output_filename)
   end
 end
@@ -36,14 +36,8 @@ def create_composite_image(base_image, asset_image)
   base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
 end
 
-def create_output_filename(asset, index, image_path, dir_name)
-  if asset.include? 'number'
-    output_filename = File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{index}.png")
-  else
-    output_filename = File.join(root_path + dir_name,
-                                "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
-  end
-  output_filename
+def create_output_filename(asset, image_path, dir_name)
+  File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
 end
 
 def create_token_directory(dir_name)
