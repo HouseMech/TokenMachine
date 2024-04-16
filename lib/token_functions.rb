@@ -12,19 +12,28 @@ end
 private
 
 def create_composites(image_path, asset_folder, dir_name)
-  base_image = check_image_exists(image_path)
+  base_image = get_image_if_exists(image_path)
   return unless base_image
 
   create_token_directory(root_path + dir_name)
 
-  asset_names(asset_folder).each_with_index do |asset, index|
-    asset_image = Magick::Image.read(asset).first
+  asset_names(asset_folder).each do |asset|
+    asset_image = get_asset_image_and_resize(asset, base_image.columns, base_image.rows)
     # Composite the asset image onto the base image
-    composited_image = base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
+    composited_image = create_composite_image(base_image, asset_image)
     # Save the composited image
-    output_filename = create_output_filename(asset, index, image_path, dir_name)
+    output_filename = create_output_filename(asset, image_path, dir_name)
     save_composite_image(composited_image, output_filename)
   end
+end
+
+def get_asset_image_and_resize(asset, base_image_width, base_image_height)
+  asset_image = get_image_if_exists(asset)
+  if (base_image_width && base_image_height) && (base_image_width != 256 && base_image_height != 256)
+    asset_image = resize(asset_image, base_image_width,
+                         base_image_height)
+  end
+  asset_image
 end
 
 def save_composite_image(composited_image, output_filename)
@@ -32,18 +41,16 @@ def save_composite_image(composited_image, output_filename)
   puts "Saved: #{output_filename}"
 end
 
-def create_composite_image(base_image, asset_image)
-  base_image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
+def create_composite_image(image, asset_image)
+  image.composite(asset_image, Magick::CenterGravity, Magick::OverCompositeOp)
 end
 
-def create_output_filename(asset, index, image_path, dir_name)
-  if asset.include? 'number'
-    output_filename = File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{index}.png")
-  else
-    output_filename = File.join(root_path + dir_name,
-                                "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
-  end
-  output_filename
+def resize(image, width, height)
+  image.resize_to_fit(width, height)
+end
+
+def create_output_filename(asset, image_path, dir_name)
+  File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
 end
 
 def create_token_directory(dir_name)
@@ -62,7 +69,7 @@ def asset_names(path_to_asset_folder)
   Dir["#{path_to_asset_folder == 'assets' ? assets_path : path_to_asset_folder}/*.png"]
 end
 
-def check_image_exists(image_path)
+def get_image_if_exists(image_path)
   begin
     base_image = Magick::Image.read(image_path).first
   rescue StandardError
