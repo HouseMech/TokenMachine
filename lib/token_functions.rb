@@ -6,10 +6,29 @@ require 'fileutils'
 public
 
 def create_token_set(image_path, asset_folder, dir_name)
-  create_composites(image_path, asset_folder, "/#{dir_name}")
+  create_composites_handler(image_path, asset_folder, "/#{dir_name}")
 end
 
 private
+
+# If a folder is passed in, loop over the images in the folder and create composites of each one
+# Otherwise just make the composites from the single image
+def create_composites_handler(path_to_dir_or_image, asset_folder, dir_name)
+  if input_is_directory(path_to_dir_or_image)
+    create_composites_from_folder(path_to_dir_or_image, asset_folder, dir_name)
+  else
+    create_composites(path_to_dir_or_image, asset_folder, dir_name)
+  end
+end
+
+def create_composites_from_folder(images_dir_path, asset_folder, output_dir_name)
+  # first, create the output directory
+  create_token_directory(root_path + output_dir_name)
+  Dir["#{images_dir_path}/*.png"].each do |image|
+    # within that directory, create the composites and put them into named folders
+    create_composites(image, asset_folder, "#{output_dir_name}/#{File.basename(image, '.png')}")
+  end
+end
 
 def create_composites(image_path, asset_folder, dir_name)
   base_image = get_image_if_exists(image_path)
@@ -77,4 +96,8 @@ def get_image_if_exists(image_path)
     return nil
   end
   base_image
+end
+
+def input_is_directory(input)
+  Dir.exist?(input)
 end
