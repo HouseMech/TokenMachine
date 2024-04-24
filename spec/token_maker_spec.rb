@@ -2,9 +2,10 @@
 
 require 'token_maker'
 
-RSpec.describe 'TokenFunctions' do
+RSpec.describe 'TokenFunctions' do # rubocop:disable Metrics/BlockLength
   let(:base_image_name) { 'testtoken.png' }
   let(:dir_path) { '/spec/dev/tokens' }
+  let(:images_directory) { '/spec/support/test_images' }
   let(:maker) { TokenMaker.new(base_image_name, assets_path) }
 
   after do
@@ -30,6 +31,14 @@ RSpec.describe 'TokenFunctions' do
       maker.create_token(dir_path)
       expect(Dir.exist?(base_path + dir_path)).to be true
       expect(Dir.children(base_path + dir_path).count).to be > 0
+    end
+
+    it 'can use a folder as input' do
+      maker2 = TokenMaker.new(base_path + images_directory, assets_path)
+      maker2.create_token(dir_path)
+      expect(Dir.exist?(base_path + dir_path)).to be true
+      expect(Dir.children(base_path + dir_path)).to include('testtoken', 'testtoken2')
+      # expect(Dir.children(base_path + dir_path).count).to be > 0
     end
   end
 end
