@@ -1,12 +1,11 @@
+# frozen_string_literal: true
+
 require_relative '../lib/token_maker'
 
 # unless ARGV.length == 1
 #   puts "Usage: ruby #{__FILE__} [base_image_name]"
 #   exit
 # end
-
-class BlankInputError < StandardError
-end
 
 if ARGV.length >= 1 # quickmode
   maker = TokenMaker.new(ARGV[0])
@@ -26,4 +25,7 @@ else # slowmode
     maker = TokenMaker.new(path)
     maker.create_token
   end
+end
+
+class BlankInputError < StandardError
 end

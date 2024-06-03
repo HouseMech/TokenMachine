@@ -5,6 +5,7 @@ require 'fileutils'
 
 public
 
+# Takes a path to an image or a folder of images and creates TTRPG tokens including numbers and status effects.
 def create_token_set(image_path, asset_folder, dir_name)
   create_composites_handler(image_path, asset_folder, "/#{dir_name}")
 end
@@ -68,8 +69,15 @@ def resize(image, width, height)
   image.resize_to_fit(width, height)
 end
 
+# example: testtoken_offline.png, testtoken_3.png
 def create_output_filename(asset, image_path, dir_name)
-  File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
+  File.join(root_path + dir_name, "#{File.basename(
+    image_path,
+    File.extname(image_path)
+  )}_#{File.basename(
+    asset,
+    File.extname(asset)
+  )}.png")
 end
 
 def create_token_directory(dir_name)

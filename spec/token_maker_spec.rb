@@ -38,7 +38,8 @@ RSpec.describe 'TokenFunctions' do # rubocop:disable Metrics/BlockLength
       maker2.create_token(dir_path)
       expect(Dir.exist?(base_path + dir_path)).to be true
       expect(Dir.children(base_path + dir_path)).to include('testtoken', 'testtoken2')
-      # expect(Dir.children(base_path + dir_path).count).to be > 0
+      expect(Dir.children("#{base_path}#{dir_path}/testtoken").count).to be > 0
+      expect(Dir.children("#{base_path}#{dir_path}/testtoken2").count).to be > 0
     end
   end
 end
