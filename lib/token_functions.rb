@@ -64,8 +64,8 @@ end
 def get_asset_image_and_resize(asset, base_image_width, base_image_height)
   asset_image = get_image_if_exists(asset)
   if (base_image_width && base_image_height) && (base_image_width != 256 && base_image_height != 256)
-    asset_image = resize(asset_image, base_image_width,
-                         base_image_height)
+    asset_image = resize_to_fit(asset_image, base_image_width,
+                                base_image_height)
   end
   asset_image
 end
@@ -81,14 +81,20 @@ end
 
 def create_composite_image_for_basic_token(image, border)
   # Resize the larger image to fit within the smaller image dimensions
-  resized_image = resize(image, 512, 512)
+  resized_image = image.resize(256, 256)
 
   # Composite the images, centering the smaller image (border) on top of the larger image (resized_image)
   resized_image.composite(border, Magick::CenterGravity, Magick::OverCompositeOp)
 end
 
-def resize(image, width, height)
+# Resize while maintaining aspect ratio
+def resize_to_fit(image, width, height)
   image.resize_to_fit(width, height)
+end
+
+# Resize ignoring aspect ratio
+def resize(image, width, height)
+  image.resize(width, height)
 end
 
 def create_output_filename_from_asset(asset, image_path, dir_name)
