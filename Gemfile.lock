@@ -45,7 +45,6 @@ GEM
     rubocop-ast (1.31.2)
       parser (>= 3.3.0.4)
     ruby-progressbar (1.13.0)
-    tk (0.5.0)
     unicode-display_width (2.5.0)
 
 PLATFORMS
@@ -56,7 +55,6 @@ DEPENDENCIES
   rmagick
   rspec
   rubocop
-  tk
 
 BUNDLED WITH
    2.5.6
