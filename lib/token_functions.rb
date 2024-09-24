@@ -5,6 +5,7 @@ require 'fileutils'
 
 public
 
+# Using an already made token with a border, create variants including numbers & bloodied/offline variants.
 def create_token_set(token_path, asset_folder, dir_name)
   create_composites_handler(token_path, asset_folder, "/#{dir_name}")
 end
