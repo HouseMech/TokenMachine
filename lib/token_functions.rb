@@ -107,7 +107,9 @@ def create_output_filename(image_path, dir_name)
 end
 
 def create_token_directory(dir_name)
-  Dir.mkdir(dir_name) unless Dir.exist?(dir_name)
+  Dir.mkdir(dir_name)
+rescue Errno::EEXIST
+  # Directory already exists, so no problem
 end
 
 def assets_path
