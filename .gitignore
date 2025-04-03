@@ -1,0 +1,67 @@
+# Ignore bundler config
+/.bundle/
+
+# Ignore all logfiles and tempfiles
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Ignore spec/dev folder containing log files
+/spec/dev/
+
+# Ignore Ruby specific files
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/test/tmp/
+/test/version_tmp/
+
+# Ignore Ruby version management files
+.ruby-version
+.ruby-gemset
+
+# Ignore Ruby LSP directory
+/.ruby-lsp/
+
+# Ignore environment files
+.env
+.env.*
+
+# Ignore database files
+*.sqlite3
+*.sqlite3-journal
+
+# Ignore OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Ignore IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Ignore dependency directories
+/vendor/bundle/
+/node_modules/
+
+# Ignore byebug command history file
+.byebug_history
+
+# Ignore master key for decrypting credentials
+/config/master.key
+
+# Ignore yarn files
+/yarn-error.log
+yarn-debug.log*
+.yarn-integrity 

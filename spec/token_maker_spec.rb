@@ -30,14 +30,14 @@ RSpec.describe 'TokenFunctions' do # rubocop:disable Metrics/BlockLength
   end
   describe 'Expectations' do
     it 'creates a directory and saves composited images' do
-      maker.create_tokens(dir_path)
+      maker.create_game_token_set(dir_path)
       expect(Dir.exist?(base_path + dir_path)).to be true
       expect(Dir.children(base_path + dir_path).count).to be > 0
     end
 
     it 'can use a folder as input' do
       maker2 = TokenMaker.new(base_path + images_directory, assets_path)
-      maker2.create_tokens(dir_path)
+      maker2.create_game_token_set(dir_path)
       expect(Dir.exist?(base_path + dir_path)).to be true
       expect(Dir.children(base_path + dir_path)).to include('testtoken', 'testtoken2')
       expect(Dir.children("#{base_path}#{dir_path}/testtoken").count).to be > 0
@@ -45,7 +45,7 @@ RSpec.describe 'TokenFunctions' do # rubocop:disable Metrics/BlockLength
     end
 
     it 'can make a single composited image' do
-      maker.create_token(base_path + base_image_name, base_path + border, dir_path)
+      maker.create_game_token(base_path + base_image_name, base_path + border, dir_path)
       expect(Dir.exist?(base_path + dir_path)).to be true
       expect(Dir.children(base_path + dir_path).count).to eq(1)
     end
