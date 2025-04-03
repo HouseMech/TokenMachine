@@ -9,6 +9,6 @@ class CreateToken < Thor
   desc 'create_token FILE FILE', 'create a single token using a border'
   def create_token(file, border)
     maker = TokenMaker.new(file, border)
-    maker.create_token(file,border)
+    maker.create_game_token(file,border)
   end
 end
