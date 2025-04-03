@@ -10,7 +10,7 @@ end
 
 if ARGV.length >= 1 # quickmode
   maker = TokenMaker.new(ARGV[0])
-  maker.create_tokens
+  maker.create_game_token_set
 else # slowmode
   puts 'Welcome to the TokenMaker!'
   puts 'This program takes an image of a token and creates numbered and alternative copies of the token.'
@@ -24,6 +24,6 @@ else # slowmode
     retry
   else
     maker = TokenMaker.new(path)
-    maker.create_tokens
+    maker.create_game_token_set
   end
 end
