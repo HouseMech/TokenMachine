@@ -24,6 +24,9 @@
 .ruby-version
 .ruby-gemset
 
+# Ignore Ruby LSP directory
+/.ruby-lsp/
+
 # Ignore environment files
 .env
 .env.*
