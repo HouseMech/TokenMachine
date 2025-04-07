@@ -120,7 +120,7 @@ end
 
 def create_token_directory(dir_name)
   Dir.mkdir(dir_name)
-rescue Errno::EEXIST
+  rescue Errno::EEXIST
   # Directory already exists, so no problem
 end
 
