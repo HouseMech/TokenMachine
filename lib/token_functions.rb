@@ -2,7 +2,8 @@
 
 require 'rmagick'
 require 'fileutils'
-DPI = 323.8
+# 323.8 is the value needed to get 1 inch tokens, accounting for issues with my pc's quirks
+DPI = 300
 PAGE_WIDTH = 2550  # 8.5 inches
 PAGE_HEIGHT = 3300 # 11 inches
 TOKEN_PADDING = 30  # Padding between tokens for cutting margins
