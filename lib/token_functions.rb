@@ -22,8 +22,8 @@ def create_basic_token(image_path, border_path, dir_name)
 end
 
 # Create a printable token sheet from a folder of tokens
-def create_printable_token_sheet(input_path, output_filename)
-  create_printable_sheet_handler(input_path, output_filename)
+def create_printable_token_sheet(input_path, output_filename, dir_name)
+  create_printable_sheet_handler(input_path, output_filename, "/#{dir_name}")
 end
 
 private
@@ -35,7 +35,7 @@ def create_basic_token_handler(path_to_image, path_to_border, dir_name)
   return unless image && border
 
   token = create_composite_image_for_basic_token(image, border)
-  token_name = create_output_filename(path_to_image, dir_name)
+  token_name = create_output_filename(path_to_image, root_path + dir_name)
   save_composite_image(token, token_name)
 end
 
@@ -150,7 +150,7 @@ def input_is_directory(input)
   Dir.exist?(input)
 end
 
-def create_printable_sheet_handler(input_path, output_filename)
+def create_printable_sheet_handler(input_path, output_filename, dir_name)
   # Create a new white canvas of letter size dimensions
   canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) {|options|
     options.background_color = 'white'
@@ -182,9 +182,9 @@ def create_printable_sheet_handler(input_path, output_filename)
 
       # If we've filled the page, save it and start a new one
       if current_row >= TOKENS_PER_COLUMN
-        save_and_number_sheet(canvas, output_filename)
-        canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) {
-          self.background_color = 'white'
+        save_and_number_sheet(canvas, output_filename, dir_name)
+        canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) {|options|
+          options.background_color = 'white'
         }
         current_row = 0
       end
@@ -192,7 +192,7 @@ def create_printable_sheet_handler(input_path, output_filename)
   end
 
   # Save the last sheet if it has any tokens
-  save_and_number_sheet(canvas, output_filename) if current_row > 0 || current_col > 0
+  save_and_number_sheet(canvas, output_filename, dir_name) if current_row > 0 || current_col > 0
 end
 
 def collect_token_images(input_path)
@@ -213,17 +213,20 @@ def collect_token_images(input_path)
   end
 end
 
-def save_and_number_sheet(canvas, output_filename)
+def save_and_number_sheet(canvas, output_filename, dir_name)
+  # Create tokens directory if it doesn't exist
+  file_path = root_path + dir_name
+  create_token_directory(file_path)
+
   # If file exists, add a number to the filename
   base = File.basename(output_filename, '.*')
   ext = File.extname(output_filename)
-  dir = File.dirname(output_filename)
 
   counter = 1
-  final_filename = output_filename
+  final_filename = File.join(file_path, "#{base}#{ext}")
 
   while File.exist?(final_filename)
-    final_filename = File.join(dir, "#{base}_#{counter}#{ext}")
+    final_filename = File.join(file_path, "#{base}_#{counter}#{ext}")
     counter += 1
   end
 
