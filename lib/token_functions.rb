@@ -36,7 +36,7 @@ def create_basic_token_handler(path_to_image, path_to_border, dir_name)
   return unless image && border
 
   token = create_composite_image_for_basic_token(image, border)
-  token_name = create_output_filename(path_to_image, root_path + dir_name)
+  token_name = create_output_filename(path_to_image, dir_name)
   save_composite_image(token, token_name)
 end
 
