@@ -30,7 +30,15 @@ class TokenMaker
     create_basic_token(image, border, dirname)
   end
 
-  def create_printable_sheet(input_path, output_filename = 'printable_sheet.png', dirname = 'printables')
-    create_printable_token_sheet(input_path, output_filename, dirname)
+  def create_printable_sheet(
+    input_path,
+    output_filename = 'printable_sheet.png',
+    options = {}
+  )
+    create_printable_token_sheet(
+      input_path,
+      output_filename,
+      options
+    )
   end
 end

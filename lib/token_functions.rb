@@ -3,12 +3,12 @@
 require 'rmagick'
 require 'fileutils'
 # 323.8 is the value needed to get 1 inch tokens, accounting for issues with my pc's quirks
-DPI = 300
+TOKEN_INCH_PIXELS = 328.8
 PAGE_WIDTH = 2550  # 8.5 inches
 PAGE_HEIGHT = 3300 # 11 inches
-TOKEN_PADDING = 30  # Padding between tokens for cutting margins
-TOKENS_PER_ROW = (PAGE_WIDTH / (DPI + TOKEN_PADDING)).floor
-TOKENS_PER_COLUMN = (PAGE_HEIGHT / (DPI + TOKEN_PADDING)).floor
+TOKEN_PADDING = 30 # Padding between tokens for cutting margins
+TOKENS_PER_ROW = (PAGE_WIDTH / (TOKEN_INCH_PIXELS + TOKEN_PADDING)).floor
+TOKENS_PER_COLUMN = (PAGE_HEIGHT / (TOKEN_INCH_PIXELS + TOKEN_PADDING)).floor
 
 public
 
@@ -23,8 +23,8 @@ def create_basic_token(image_path, border_path, dir_name)
 end
 
 # Create a printable token sheet from a folder of tokens
-def create_printable_token_sheet(input_path, output_filename, dir_name)
-  create_printable_sheet_handler(input_path, output_filename, "/#{dir_name}")
+def create_printable_token_sheet(input_path, output_filename, options = {})
+  create_printable_sheet_handler(input_path, output_filename, options)
 end
 
 private
@@ -121,7 +121,7 @@ end
 
 def create_token_directory(dir_name)
   Dir.mkdir(dir_name)
-  rescue Errno::EEXIST
+rescue Errno::EEXIST
   # Directory already exists, so no problem
 end
 
@@ -151,11 +151,11 @@ def input_is_directory(input)
   Dir.exist?(input)
 end
 
-def create_printable_sheet_handler(input_path, output_filename, dir_name)
+def create_printable_sheet_handler(input_path, output_filename, opts)
   # Create a new white canvas of letter size dimensions
-  canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) {|options|
+  canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) do |options|
     options.background_color = 'white'
-  }
+  end
   canvas.x_resolution = 300
   canvas.y_resolution = 300
   canvas.units = Magick::PixelsPerInchResolution
@@ -169,31 +169,33 @@ def create_printable_sheet_handler(input_path, output_filename, dir_name)
 
   token_images.each do |token|
     # Calculate position for this token
-    x = current_col * (DPI + TOKEN_PADDING) + TOKEN_PADDING
-    y = current_row * (DPI + TOKEN_PADDING) + TOKEN_PADDING
+    x = current_col * (TOKEN_INCH_PIXELS + TOKEN_PADDING) + TOKEN_PADDING
+    y = current_row * (TOKEN_INCH_PIXELS + TOKEN_PADDING) + TOKEN_PADDING
 
     # Composite the token onto the canvas
     canvas = canvas.composite(token, x, y, Magick::OverCompositeOp)
 
     # Move to next position
     current_col += 1
-    if current_col >= TOKENS_PER_ROW
-      current_col = 0
-      current_row += 1
+    next unless current_col >= TOKENS_PER_ROW
 
-      # If we've filled the page, save it and start a new one
-      if current_row >= TOKENS_PER_COLUMN
-        save_and_number_sheet(canvas, output_filename, dir_name)
-        canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) {|options|
-          options.background_color = 'white'
-        }
-        current_row = 0
-      end
+    current_col = 0
+    current_row += 1
+
+    # If we've filled the page, save it and start a new one
+    next unless current_row >= TOKENS_PER_COLUMN
+
+    save_and_number_sheet(canvas, output_filename, opts[:save_to_directory])
+    canvas = Magick::Image.new(PAGE_WIDTH, PAGE_HEIGHT) do |options|
+      options.background_color = 'white'
     end
+    current_row = 0
   end
 
   # Save the last sheet if it has any tokens
-  save_and_number_sheet(canvas, output_filename, dir_name) if current_row > 0 || current_col > 0
+  return unless current_row.positive? || current_col.positive?
+
+  save_and_number_sheet(canvas, output_filename, opts[:save_to_directory])
 end
 
 def collect_token_images(input_path)
@@ -203,14 +205,15 @@ def collect_token_images(input_path)
       image = get_image_if_exists(file)
       next unless image
 
-      # Resize to exactly 1 inch (DPI x DPI pixels)
-      image.resize(DPI, DPI)
+      # Resize to exactly 1 inch (TOKEN_INCH_PIXELS x TOKEN_INCH_PIXELS pixels)
+      image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)
     end.compact
   else
     # Single file case
     image = get_image_if_exists(input_path)
     return [] unless image
-    [image.resize(DPI, DPI)]
+
+    [image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)]
   end
 end
 
@@ -231,9 +234,8 @@ def save_and_number_sheet(canvas, output_filename, dir_name)
     counter += 1
   end
 
-  # Add a note about the DPI to ensure proper printing
   canvas.units = Magick::PixelsPerInchResolution
-  canvas.density = "#{DPI}x#{DPI}"
+  canvas.density = "#{TOKEN_INCH_PIXELS}x#{TOKEN_INCH_PIXELS}"
   canvas.write(final_filename)
-  puts "Saved sheet: #{final_filename} (Please ensure to print at 300 DPI for correct 1-inch token size)"
+  puts "Saved sheet: #{final_filename}."
 end

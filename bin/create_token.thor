@@ -14,17 +14,18 @@ class CreateToken < Thor
     maker = TokenMaker.new(file, border)
     maker.create_game_token(file, border)
   end
-  desc 'create_printable_sheet INPUT OUTPUT DIRNAME', 'create printable sheet(s) of tokens'
+  desc 'create_printable_sheet INPUT OUTPUT', 'create printable sheet(s) of tokens'
+  method_option :save_to_directory, type: :string, default: '/printables', desc: 'Path to save directory'
   method_option :include_bloodied, type: :boolean, default: true, desc: 'Include bloodied variants'
   method_option :include_deactivated, type: :boolean, default: true, desc: 'Include deactivated variants'
   method_option :copies, type: :numeric, default: 1, desc: 'Number of copies of each token'
-  def create_printable_sheet(input_path, output_filename, dir_name)
+  def create_printable_sheet(input_path, output_filename)
     maker = TokenMaker.new(input_path)
     maker.create_printable_sheet(
       input_path,
       output_filename,
-      dir_name,
       {
+        save_to_directory: options[:save_to_directory],
         include_bloodied: options[:include_bloodied],
         include_deactivated: options[:include_deactivated],
         copies: options[:copies]
