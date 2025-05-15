@@ -160,7 +160,7 @@ def create_printable_sheet_handler(input_path, output_filename, opts)
   canvas.y_resolution = 300
   canvas.units = Magick::PixelsPerInchResolution
 
-  token_images = collect_token_images(input_path)
+  token_images = collect_token_images(input_path, opts)
   return if token_images.empty?
 
   # Place each token on the canvas
@@ -173,7 +173,9 @@ def create_printable_sheet_handler(input_path, output_filename, opts)
     y = current_row * (TOKEN_INCH_PIXELS + TOKEN_PADDING) + TOKEN_PADDING
 
     # Composite the token onto the canvas
-    canvas = canvas.composite(token, x, y, Magick::OverCompositeOp)
+    canvas = canvas.composite(token[:image], x, y, Magick::OverCompositeOp)
+    token[:image].destroy! # Release the token image from memory
+    GC.start
 
     # Move to next position
     current_col += 1
@@ -198,22 +200,36 @@ def create_printable_sheet_handler(input_path, output_filename, opts)
   save_and_number_sheet(canvas, output_filename, opts[:save_to_directory])
 end
 
-def collect_token_images(input_path)
+def collect_token_images(input_path, opts)
   if input_is_directory(input_path)
     # Collect all PNG files from all subdirectories
-    Dir.glob(File.join(input_path, '**', '*.png')).map do |file|
-      image = get_image_if_exists(file)
-      next unless image
+    Dir.glob(File.join(input_path, '**', '*.png')).flat_map do |file|
+      base_name = File.basename(file, '.png')
 
-      # Resize to exactly 1 inch (TOKEN_INCH_PIXELS x TOKEN_INCH_PIXELS pixels)
-      image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)
+      # Skip special tokens if not included
+      next if base_name.include?('bloodied') && !opts[:include_bloodied]
+      next if base_name.include?('offline') && !opts[:include_offline]
+
+      # Add the token the specified number of times
+      opts[:copies].times.map do
+        image = get_image_if_exists(file)
+        next unless image
+
+        {
+          image: image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)
+        }
+      end
     end.compact
   else
     # Single file case
-    image = get_image_if_exists(input_path)
-    return [] unless image
+    opts[:copies].times.map do
+      image = get_image_if_exists(input_path)
+      return [] unless image
 
-    [image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)]
+      {
+        image: image.resize(TOKEN_INCH_PIXELS, TOKEN_INCH_PIXELS)
+      }
+    end
   end
 end
 
