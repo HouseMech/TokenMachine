@@ -50,4 +50,60 @@ RSpec.describe 'TokenFunctions' do # rubocop:disable Metrics/BlockLength
       expect(Dir.children(base_path + dir_path).count).to eq(1)
     end
   end
+
+  describe 'Printable Sheet Creation' do
+    let(:printable_dir) { '/spec/dev/printables' }
+    let(:tokens_dir) { base_path + dir_path }
+
+    before do
+      maker.create_game_token_set(dir_path)
+    end
+
+    after do
+      FileUtils.rm_rf(base_path + printable_dir)
+    end
+
+    it 'creates a printable sheet from token directory' do
+      output_filename = 'test_sheet'
+      options = {
+        save_to_directory: printable_dir,
+        copies: 1,
+        include_bloodied: true,
+        include_offline: true
+      }
+      maker.create_printable_sheet(tokens_dir, output_filename, options)
+
+      expect(Dir.exist?(base_path + printable_dir)).to be true
+      expect(File.exist?(File.join(base_path + printable_dir, 'test_sheet.png'))).to be true
+    end
+
+    it 'adds .png extension when output filename has no extension' do
+      output_filename = 'sheet_no_ext'
+      options = {
+        save_to_directory: printable_dir,
+        copies: 1,
+        include_bloodied: true,
+        include_offline: true
+      }
+      maker.create_printable_sheet(tokens_dir, output_filename, options)
+
+      expect(File.exist?(File.join(base_path + printable_dir, 'sheet_no_ext.png'))).to be true
+    end
+
+    it 'handles existing files by numbering them' do
+      output_filename = 'duplicate_sheet.png'
+      options = {
+        save_to_directory: printable_dir,
+        copies: 1,
+        include_bloodied: true,
+        include_offline: true
+      }
+
+      maker.create_printable_sheet(tokens_dir, output_filename, options)
+      maker.create_printable_sheet(tokens_dir, output_filename, options)
+
+      expect(File.exist?(File.join(base_path + printable_dir, 'duplicate_sheet.png'))).to be true
+      expect(File.exist?(File.join(base_path + printable_dir, 'duplicate_sheet_1.png'))).to be true
+    end
+  end
 end

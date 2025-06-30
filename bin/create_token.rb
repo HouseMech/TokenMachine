@@ -10,7 +10,13 @@ end
 
 if ARGV.length >= 1 # quickmode
   maker = TokenMaker.new(ARGV[0])
-  maker.create_game_token_set
+  if ARGV[1] && ARGV[1].match?(/^\d+$/)
+    # Second argument is a number, use dynamic numbering
+    count = ARGV[1].to_i
+    maker.create_game_token_set_with_dynamic_numbers(count)
+  else
+    maker.create_game_token_set
+  end
 else # slowmode
   puts 'Welcome to the TokenMaker!'
   puts 'This program takes an image of a token and creates numbered and alternative copies of the token.'
@@ -23,7 +29,14 @@ else # slowmode
     puts e.message
     retry
   else
+    puts 'Enter number of tokens to create (leave blank for default 0-9 + special): '
+    count_input = gets.strip
     maker = TokenMaker.new(path)
-    maker.create_game_token_set
+    if count_input.empty?
+      maker.create_game_token_set
+    else
+      count = count_input.to_i
+      maker.create_game_token_set_with_dynamic_numbers(count)
+    end
   end
 end
