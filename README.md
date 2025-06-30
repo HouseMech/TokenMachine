@@ -24,12 +24,18 @@ bundle install
 Creates numbered tokens using PNG overlays (0-9) plus special variants:
 ```bash
 ruby bin/create_token.rb [image_file]
+
+# Working example:
+ruby bin/create_token.rb testtoken.png
 ```
 
 #### Create Token Set (Dynamic Numbering)
 Creates any number range (0-N) using dynamically rendered numbers:
 ```bash
 ruby bin/create_token.rb [image_file] [count]
+
+# Working example:
+ruby bin/create_token.rb testtoken.png 25
 ```
 
 #### Interactive Mode
@@ -40,7 +46,7 @@ ruby bin/create_token.rb
 
 ### Thor CLI Commands
 
-The Thor CLI provides advanced options for token creation and sheet generation.
+The Thor CLI provides advanced options for token creation and sheet generation. To use these commands, ensure you are in the `/bin` directory.
 
 #### Create Token Set
 ```bash
@@ -54,13 +60,16 @@ thor create_token:create_token_set [image_file]
 **Examples:**
 ```bash
 # Traditional numbered tokens (0-9) + special variants
-thor create_token:create_token_set hero.png
+thor create_token:create_token_set [image_file]
+thor create_token:create_token_set testtoken.png
 
 # Dynamic numbering - creates tokens 0-20
-thor create_token:create_token_set hero.png --count=21
+thor create_token:create_token_set [image_file] --count=21
+thor create_token:create_token_set testtoken.png --count=21
 
 # Dynamic numbering without special tokens
-thor create_token:create_token_set hero.png --count=15 --no-include-special
+thor create_token:create_token_set [image_file] --count=15 --no-include-special
+thor create_token:create_token_set testtoken.png --count=15 --no-include-special
 ```
 
 #### Create Single Token
@@ -70,7 +79,7 @@ thor create_token:create_token [image_file] [border_file]
 
 **Example:**
 ```bash
-thor create_token:create_token hero.png lib/assets/token_borders/silver.png
+thor create_token:create_token testtoken.png ../lib/assets/token_borders/silver.png
 ```
 
 #### Create Printable Sheet
@@ -87,13 +96,16 @@ thor create_token:create_printable_sheet [input_path] [output_filename]
 **Examples:**
 ```bash
 # Create printable sheet from tokens directory
-thor create_token:create_printable_sheet tokens/ character_sheet.png
+thor create_token:create_printable_sheet [input_path] [output_filename]
+thor create_token:create_printable_sheet ../tokens character_sheet
 
 # Multiple copies with custom directory
-thor create_token:create_printable_sheet tokens/ sheet --copies=3 --save-to-directory=/custom/path
+thor create_token:create_printable_sheet [input_path] [output_filename] --copies=3 --save-to-directory=/custom/path
+thor create_token:create_printable_sheet ../tokens sheet --copies=3 --save-to-directory=/printables
 
 # Exclude special variants
-thor create_token:create_printable_sheet tokens/ clean_sheet --no-include-bloodied --no-include-offline
+thor create_token:create_printable_sheet [input_path] [output_filename] --no-include-bloodied --no-include-offline
+thor create_token:create_printable_sheet ../tokens clean_sheet --no-include-bloodied --no-include-offline
 ```
 
 ## Directory Structure
