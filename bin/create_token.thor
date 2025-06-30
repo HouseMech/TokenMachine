@@ -5,9 +5,15 @@ require_relative '../lib/token_maker'
 # Thor command line interface for creating and managing game tokens
 class CreateToken < Thor
   desc 'create_token_set FILE', 'create a group of tokens'
+  method_option :count, type: :numeric, desc: 'Number of tokens to create (enables dynamic numbering)'
+  method_option :include_special, type: :boolean, default: true, desc: 'Include special tokens (bloodied, offline)'
   def create_token_set(file)
     maker = TokenMaker.new(file)
-    maker.create_game_token_set
+    if options[:count]
+      maker.create_game_token_set_with_dynamic_numbers(options[:count], options[:include_special])
+    else
+      maker.create_game_token_set
+    end
   end
   desc 'create_token FILE FILE', 'create a single token using a border'
   def create_token(file, border)

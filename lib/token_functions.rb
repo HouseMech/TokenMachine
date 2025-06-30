@@ -13,8 +13,8 @@ TOKENS_PER_COLUMN = (PAGE_HEIGHT / (TOKEN_INCH_PIXELS + TOKEN_PADDING)).floor
 public
 
 # Using an already made token with a border, create variants including numbers & bloodied/offline variants.
-def create_token_set(token_path, asset_folder, dir_name)
-  create_composites_handler(token_path, asset_folder, "/#{dir_name}")
+def create_token_set(token_path, asset_folder, dir_name, options = {})
+  create_composites_handler(token_path, asset_folder, "/#{dir_name}", options)
 end
 
 # Create a basic token from an image and a border
@@ -42,36 +42,49 @@ end
 
 # If a folder is passed in, loop over the images in the folder and create composites of each one
 # Otherwise just make the composites from the single image
-def create_composites_handler(path_to_dir_or_image, asset_folder, dir_name)
+def create_composites_handler(path_to_dir_or_image, asset_folder, dir_name, options = {})
   if input_is_directory(path_to_dir_or_image)
-    create_composites_from_folder(path_to_dir_or_image, asset_folder, dir_name)
+    create_composites_from_folder(path_to_dir_or_image, asset_folder, dir_name, options)
   else
-    create_composites(path_to_dir_or_image, asset_folder, dir_name)
+    create_composites(path_to_dir_or_image, asset_folder, dir_name, options)
   end
 end
 
-def create_composites_from_folder(images_dir_path, asset_folder, output_dir_name)
+def create_composites_from_folder(images_dir_path, asset_folder, output_dir_name, options = {})
   # first, create the output directory
   create_token_directory(root_path + output_dir_name)
   Dir["#{images_dir_path}/*.png"].each do |image|
     # within that directory, create the composites and put them into named folders
-    create_composites(image, asset_folder, "#{output_dir_name}/#{File.basename(image, '.png')}")
+    create_composites(image, asset_folder, "#{output_dir_name}/#{File.basename(image, '.png')}", options)
   end
 end
 
-def create_composites(image_path, asset_folder, dir_name)
+def create_composites(image_path, asset_folder, dir_name, options = {})
   base_image = get_image_if_exists(image_path)
   return unless base_image
 
   create_token_directory(root_path + dir_name)
 
-  asset_names(asset_folder).each do |asset|
-    asset_image = get_asset_image_and_resize(asset, base_image.columns, base_image.rows)
-    # Composite the asset image onto the base image
-    composited_image = create_composite_image(base_image, asset_image)
-    # Save the composited image
-    output_filename = create_output_filename_from_asset(asset, image_path, dir_name)
-    save_composite_image(composited_image, output_filename)
+  if options[:use_dynamic_numbers] && options[:count]
+    # Generate numbered tokens dynamically
+    (0...options[:count]).each do |number|
+      numbered_image = create_numbered_token(base_image, number)
+      output_filename = create_output_filename_with_number(image_path, number, dir_name)
+      save_composite_image(numbered_image, output_filename)
+    end
+
+    # Generate special tokens if assets exist
+    create_special_tokens(base_image, image_path, dir_name) if options[:include_special_tokens]
+  else
+    # Original asset-based approach
+    asset_names(asset_folder).each do |asset|
+      asset_image = get_asset_image_and_resize(asset, base_image.columns, base_image.rows)
+      # Composite the asset image onto the base image
+      composited_image = create_composite_image(base_image, asset_image)
+      # Save the composited image
+      output_filename = create_output_filename_from_asset(asset, image_path, dir_name)
+      save_composite_image(composited_image, output_filename)
+    end
   end
 end
 
@@ -113,6 +126,74 @@ end
 
 def create_output_filename_from_asset(asset, image_path, dir_name)
   File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{File.basename(asset, '.png')}.png")
+end
+
+def create_output_filename_with_number(image_path, number, dir_name)
+  File.join(root_path + dir_name, "#{File.basename(image_path, '.png')}_#{number}.png")
+end
+
+def create_numbered_token(base_image, number)
+  # Create a copy of the base image to avoid modifying the original
+  numbered_image = base_image.copy
+
+  # Calculate circle dimensions based on image size (matching PNG assets)
+  circle_diameter = (base_image.columns * 0.18).to_i # ~18% of image width
+  circle_radius = circle_diameter / 2
+
+  # Position circle in bottom-right with padding from edges
+  # Additional offset to move up and left as requested
+  padding = (base_image.columns * 0.08).to_i
+  additional_offset = 30
+  circle_center_x = base_image.columns - circle_radius - padding - additional_offset
+  circle_center_y = base_image.rows - circle_radius - padding - additional_offset
+
+  # Draw the circular background first
+  gc = Magick::Draw.new
+  gc.fill = 'white' # White background
+  gc.stroke = 'black'
+  gc.stroke_width = 4
+  gc.circle(circle_center_x, circle_center_y,
+            circle_center_x + circle_radius, circle_center_y)
+  gc.draw(numbered_image)
+
+  # Configure text drawing
+  gc = Magick::Draw.new
+  gc.font_family = 'Arial'
+  gc.font_weight = Magick::BoldWeight
+  gc.pointsize = calculate_font_size(base_image.columns)
+  gc.fill = 'black'
+  gc.stroke = 'none' # No stroke on text since circle provides contrast
+
+  # Center text within the circle
+  text_metrics = gc.get_type_metrics(number.to_s)
+  text_x = circle_center_x - (text_metrics.width / 2)
+  text_y = circle_center_y + (text_metrics.height / 4) # Adjust for baseline
+
+  # Draw the number centered in the circle
+  gc.annotate(numbered_image, 0, 0, text_x, text_y, number.to_s)
+
+  numbered_image
+end
+
+def create_special_tokens(base_image, image_path, dir_name)
+  special_assets = ['bloodied.png', 'offline.png'].map { |asset| File.join(assets_path, asset) }
+
+  special_assets.each do |asset_path|
+    next unless File.exist?(asset_path)
+
+    asset_image = get_asset_image_and_resize(asset_path, base_image.columns, base_image.rows)
+    composited_image = create_composite_image(base_image, asset_image)
+    output_filename = create_output_filename_from_asset(asset_path, image_path, dir_name)
+    save_composite_image(composited_image, output_filename)
+  end
+end
+
+def calculate_font_size(image_width)
+  # Scale font size based on image dimensions to match existing number overlays
+  # Base font size for 256px wide image is 36 (larger and bolder)
+  base_size = 36
+  base_width = 256
+  (base_size * image_width / base_width).to_i
 end
 
 def create_output_filename(image_path, dir_name)
