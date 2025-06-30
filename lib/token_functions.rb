@@ -322,6 +322,7 @@ def save_and_number_sheet(canvas, output_filename, dir_name)
   # If file exists, add a number to the filename
   base = File.basename(output_filename, '.*')
   ext = File.extname(output_filename)
+  ext = '.png' if ext.empty?
 
   counter = 1
   final_filename = File.join(file_path, "#{base}#{ext}")
